@@ -6,27 +6,34 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 
-use App\Models\CoursesModel;
+use App\Models\LeaguesModel;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Slim\Views\PhpRenderer;
 
-class CoursesAPIController
+class LeaguesController
 {
-    private CoursesModel $model;
+    private LeaguesModel $model;
 
     // Here, the parameter is automatically supplied by the Dependency Injection Container based on the type hint
-    public function __construct(CoursesModel $model)
+    public function __construct(LeaguesModel $model)
     {
         $this->model = $model;
     }
 
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $courses = $this->model->getCourses();
+        $params = $request->getQueryParams();
+        if ($params['name']){
+            $name = $params['name'];
+            $leagues = $this->model->getLeagueByName($name);
+        } else {
+            $leagues = $this->model->getLeagues();
+        }
         $responseBody = [
-            'message' => 'Courses successfully retrieved from db.',
+            'message' => 'Leagues successfully retrieved from db.',
             'status' => 200,
-            'data' => $courses
+            'data' => $leagues
         ];
         return $response->withJson($responseBody);
     }
